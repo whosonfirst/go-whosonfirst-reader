@@ -6,7 +6,7 @@ Common methods for reading Who's On First documents.
 
 _Note that error handling has been removed for the sake of brevity._
 
-### LoadReadCloserFromID(ctx context.Context, r go_reader.Reader, id int64) (io.ReadCloser, error)
+### LoadReadCloserFromID
 
 ```
 import (
@@ -30,7 +30,7 @@ func main() {
 }
 ```
 
-### func LoadBytesFromID(ctx context.Context, r go_reader.Reader, id int64) ([]byte, error)
+### LoadBytesFromID
 
 ```
 import (
@@ -53,7 +53,7 @@ func main() {
 }
 ```
 
-### func LoadFeatureFromID(ctx context.Context, r go_reader.Reader, id int64) (geojson.Feature, error)
+### LoadFeatureFromID
 
 ```
 import (
