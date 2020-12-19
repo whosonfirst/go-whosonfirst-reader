@@ -22,7 +22,7 @@ func TestLoadFeatureFromID(t *testing.T) {
 
 	fixtures := filepath.Join(cwd, "fixtures")
 
-	r_uri := fmt.Sprintf("local://%s", fixtures)
+	r_uri := fmt.Sprintf("fs://%s", fixtures)
 	r, err := reader.NewReader(ctx, r_uri)
 
 	if err != nil {
