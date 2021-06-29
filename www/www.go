@@ -2,12 +2,12 @@
 package www
 
 import (
-	"net/http"
-	"io"
-	"github.com/whosonfirst/go-reader"	
+	"github.com/whosonfirst/go-reader"
 	"github.com/whosonfirst/go-whosonfirst-uri"
-	"strconv"
+	"io"
 	_ "log"
+	"net/http"
+	"strconv"
 )
 
 // The name of the HTTP response header where the Who's On First relative path
@@ -23,28 +23,28 @@ func ParseURIHandler(next http.Handler) http.HandlerFunc {
 	fn := func(rsp http.ResponseWriter, req *http.Request) {
 
 		path := req.URL.Path
-		
+
 		wofid, uri_args, err := uri.ParseURI(path)
-		
+
 		if err != nil || wofid == -1 {
-			
+
 			q := req.URL.Query()
 			str_id := q.Get("id")
-			
+
 			if str_id == "" {
 				http.Error(rsp, err.Error(), http.StatusNotFound)
 				return
 			}
-			
+
 			id, err := strconv.ParseInt(str_id, 10, 64)
-			
+
 			if err != nil {
 				http.Error(rsp, err.Error(), http.StatusBadRequest)
 				return
 			}
-			
+
 			wofid = id
-			
+
 			uri_args = &uri.URIArgs{
 				IsAlternate: false,
 			}
@@ -56,16 +56,16 @@ func ParseURIHandler(next http.Handler) http.HandlerFunc {
 			http.Error(rsp, err.Error(), http.StatusInternalServerError)
 			return
 		}
-		
+
 		rsp.Header().Set(HEADER_RELPATH, rel_path)
-		
+
 		if next != nil {
 			next.ServeHTTP(rsp, req)
 			return
 		}
 
 		rsp.Write([]byte(rel_path))
-		return	
+		return
 	}
 
 	return http.HandlerFunc(fn)
@@ -81,11 +81,11 @@ func RedirectHandler(r reader.Reader) (http.HandlerFunc, error) {
 
 		ctx := req.Context()
 
-		rel_path := rsp.Header().Get(HEADER_RELPATH)		
+		rel_path := rsp.Header().Get(HEADER_RELPATH)
 
 		if rel_path == "" {
 			http.Error(rsp, "Unable to determine URI", http.StatusNotFound)
-			return			
+			return
 		}
 
 		abs_path := r.ReaderURI(ctx, rel_path)
@@ -94,7 +94,7 @@ func RedirectHandler(r reader.Reader) (http.HandlerFunc, error) {
 	}
 
 	h := http.HandlerFunc(fn)
-	return h, nil	
+	return h, nil
 }
 
 // Emit the out of r.Read for a URI. This handler is meant to be used
@@ -106,12 +106,12 @@ func DataHandler(r reader.Reader) (http.HandlerFunc, error) {
 	fn := func(rsp http.ResponseWriter, req *http.Request) {
 
 		ctx := req.Context()
-		
+
 		rel_path := rsp.Header().Get(HEADER_RELPATH)
-		
+
 		if rel_path == "" {
-			http.Error(rsp, "Unable to determine URI", http.StatusNotFound)			
-			return			
+			http.Error(rsp, "Unable to determine URI", http.StatusNotFound)
+			return
 		}
 
 		fh, err := r.Read(ctx, rel_path)
@@ -122,7 +122,7 @@ func DataHandler(r reader.Reader) (http.HandlerFunc, error) {
 		}
 
 		rsp.Header().Set("Content-Type", "application/json")
-		
+
 		_, err = io.Copy(rsp, fh)
 
 		if err != nil {
@@ -134,5 +134,5 @@ func DataHandler(r reader.Reader) (http.HandlerFunc, error) {
 	}
 
 	h := http.HandlerFunc(fn)
-	return h, nil	
+	return h, nil
 }

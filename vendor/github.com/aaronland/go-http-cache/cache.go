@@ -61,7 +61,7 @@ type Adapter interface {
 }
 
 // Middleware is the HTTP cache middleware handler.
-func (c *Client) Middleware(next http.Handler) http.Handler {
+func (c *Client) Middleware(next http.Handler) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if c.cacheableMethod(r.Method) {
 			sortURLParams(r.URL)
@@ -108,6 +108,11 @@ func (c *Client) Middleware(next http.Handler) http.Handler {
 			}
 
 			rec := httptest.NewRecorder()
+
+			for k, v := range w.Header() {
+				rec.Header().Set(k, strings.Join(v, ","))
+			}
+
 			next.ServeHTTP(rec, r)
 			result := rec.Result()
 
