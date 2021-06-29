@@ -1,3 +1,7 @@
+# github.com/aaronland/go-http-cache v0.0.0-20210628163158-401cb26ade0f
+## explicit
+github.com/aaronland/go-http-cache
+github.com/aaronland/go-http-cache/adapter/memory
 # github.com/aaronland/go-http-server v0.0.6
 ## explicit
 github.com/aaronland/go-http-server

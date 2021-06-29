@@ -1,3 +1,5 @@
+github.com/aaronland/go-http-cache v0.0.0-20210628163158-401cb26ade0f h1:zoIDbLPOpkI2WEsvXiR4Y3EzYoPGyXi6ABBTrdZIf8c=
+github.com/aaronland/go-http-cache v0.0.0-20210628163158-401cb26ade0f/go.mod h1:CvRIJ5/CDx9B5Y3NhoARDTjqWRM4lnABz2/QXejG8F4=
 github.com/aaronland/go-http-server v0.0.6 h1:KR6zm17QB+Mal0kpn/7vZHzj18W2O5ytGKIF7D1cN/4=
 github.com/aaronland/go-http-server v0.0.6/go.mod h1:6dtsZDrQG0XvUOCL0eaHsUw+7gw3Xa/Nm+XofvkSw2w=
 github.com/aaronland/go-roster v0.0.2 h1:2Fu7v4VQLRLRL/Zgr6R9S5JxsW75Ab/K88QtMVX532s=

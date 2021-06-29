@@ -5,12 +5,15 @@ import (
 	"flag"
 	"fmt"
 	"github.com/aaronland/go-http-server"
+	"github.com/aaronland/go-http-cache"
+	"github.com/aaronland/go-http-cache/adapter/memory"
 	"github.com/sfomuseum/go-flags/flagset"
 	"github.com/whosonfirst/go-reader"
 	"github.com/whosonfirst/go-whosonfirst-reader/application"
 	"github.com/whosonfirst/go-whosonfirst-reader/www"
 	"log"
 	"net/http"
+	"time"
 )
 
 var server_uri string
@@ -77,6 +80,27 @@ func (app *ServerApplication) RunWithFlagSet(ctx context.Context, fs *flag.FlagS
 
 		handler = data_handler
 
+		memcached, err := memory.NewAdapter(
+			memory.AdapterWithAlgorithm(memory.LRU),
+			memory.AdapterWithCapacity(10000000),
+		)
+		
+		if err != nil {
+			return fmt.Errorf("Failed to create cache memory adapter, %w", err)
+		}
+		
+		cacheClient, err := cache.NewClient(
+			cache.ClientWithAdapter(memcached),
+			cache.ClientWithTTL(10 * time.Minute),
+			cache.ClientWithRefreshKey("opn"),
+		)
+
+		if err != nil {
+			return fmt.Errorf("Failed to create cache client, %w", err)
+		}
+
+		handler = cacheClient.Middleware(handler)
+		
 	case "redirect":
 
 		redirect_handler, err := www.RedirectHandler(r)
