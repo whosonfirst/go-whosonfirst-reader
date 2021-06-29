@@ -20,6 +20,7 @@ import (
 var server_uri string
 var reader_uri string
 var handler_type string
+var enable_cache bool
 
 type ServerApplication struct {
 	application.Application
@@ -37,6 +38,7 @@ func (app *ServerApplication) DefaultFlagSet(ctx context.Context) (*flag.FlagSet
 	fs.StringVar(&server_uri, "server-uri", "http://localhost:8080", "A valid aaronland/go-http-server URI.")
 	fs.StringVar(&reader_uri, "reader-uri", "null://", "A valid whosonfirst/go-reader URI.")
 	fs.StringVar(&handler_type, "handler-type", "data", "Valid options are: data, redirect.")
+	fs.BoolVar(&enable_cache, "enable-cache", true, "Enable the aaronland/go-http-cache middleware handler for caching lookups.")
 
 	return fs, nil
 }
@@ -81,32 +83,6 @@ func (app *ServerApplication) RunWithFlagSet(ctx context.Context, fs *flag.FlagS
 
 		handler = data_handler
 
-		do_cache := true
-
-		if do_cache {
-
-			memcached, err := memory.NewAdapter(
-				memory.AdapterWithAlgorithm(memory.LRU),
-				memory.AdapterWithCapacity(10000000),
-			)
-
-			if err != nil {
-				return fmt.Errorf("Failed to create cache memory adapter, %w", err)
-			}
-
-			cacheClient, err := cache.NewClient(
-				cache.ClientWithAdapter(memcached),
-				cache.ClientWithTTL(10*time.Minute),
-				cache.ClientWithRefreshKey("opn"),
-			)
-
-			if err != nil {
-				return fmt.Errorf("Failed to create cache client, %w", err)
-			}
-
-			handler = cacheClient.Middleware(handler)
-		}
-
 	case "redirect":
 
 		redirect_handler, err := www.RedirectHandler(r)
@@ -121,10 +97,51 @@ func (app *ServerApplication) RunWithFlagSet(ctx context.Context, fs *flag.FlagS
 		return fmt.Errorf("Invalid -handler-type (%s)", handler_type)
 	}
 
+	// Cache the previous handler (data, redirect) results since they might be
+	// expensive especially if we are using a go-whosonfirst-findingaid instance
+	// the reader.Reader itself to locate a record (to read).
+	
+	if enable_cache {
+
+		memcached, err := memory.NewAdapter(
+			memory.AdapterWithAlgorithm(memory.LRU),
+			memory.AdapterWithCapacity(10000000),	// TO DO: make this a CLI option
+		)
+		
+		if err != nil {
+			return fmt.Errorf("Failed to create cache memory adapter, %w", err)
+		}
+		
+		cacheClient, err := cache.NewClient(
+			cache.ClientWithAdapter(memcached),
+			cache.ClientWithTTL(10*time.Minute),	// TO DO: make this a CLI option
+			cache.ClientWithRefreshKey("opn"),	// TO DO: make this a CLI option
+		)
+		
+		if err != nil {
+			return fmt.Errorf("Failed to create cache client, %w", err)
+		}
+		
+		handler = cacheClient.Middleware(handler)
+	}
+
+	// This one is important: This is the first handler that will be invoked that will
+	// resolve the request URI in to a valid Who's On First relative path. That path will
+	// be stored in the handler's `X-WhosOnFirst-Rel-Path` response header. It is assumed
+	// the header will be read and acted on by "downstream" middleware handler.
+	
 	handler = www.ParseURIHandler(handler)
 
 	mux := http.NewServeMux()
 	mux.Handle("/", handler)
+
+	// For example: This is the same ParseURIHandler as above but without any "next"
+	// handlers and so the default behaviour is simply to write the `X-WhosOnFirst-Rel-Path`
+	// response header and print the relative path to the browser.
+	
+	uri_handler := www.ParseURIHandler(nil)
+	
+	mux.Handle("/uri/", uri_handler)
 
 	s, err := server.NewServer(ctx, server_uri)
 

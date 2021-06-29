@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"hash/fnv"
 	"io"
+	_ "log"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
@@ -20,6 +21,9 @@ import (
 type Response struct {
 	// Value is the cached response value.
 	Value []byte
+
+	// StatusCode is the HTTP status code of the original request.
+	StatusCode int
 
 	// Header is the cached response header.
 	Header http.Header
@@ -95,6 +99,15 @@ func (c *Client) Middleware(next http.Handler) http.HandlerFunc {
 						response.Frequency++
 						c.adapter.Set(key, response.Bytes(), response.Expiration)
 
+						if response.StatusCode >= 300 && response.StatusCode <= 308 {
+
+							loc := response.Header.Get("Location")
+
+							if loc != "" {
+								http.Redirect(w, r, loc, response.StatusCode)
+								return
+							}
+						}
 						//w.WriteHeader(http.StatusNotModified)
 						for k, v := range response.Header {
 							w.Header().Set(k, strings.Join(v, ","))
@@ -123,6 +136,7 @@ func (c *Client) Middleware(next http.Handler) http.HandlerFunc {
 
 				response := Response{
 					Value:      value,
+					StatusCode: statusCode,
 					Header:     result.Header,
 					Expiration: now.Add(c.ttl),
 					LastAccess: now,
