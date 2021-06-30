@@ -338,6 +338,8 @@ github.com/whosonfirst/go-whosonfirst-spr/v2 v2.0.0/go.mod h1:tveSSFDn8XoiCeAMar
 github.com/whosonfirst/go-whosonfirst-uri v0.2.0/go.mod h1:8eaDVcc4v+HHHEDaRbApdmhPwM4/JQllw2PktvZcPVs=
 github.com/whosonfirst/go-whosonfirst-uri v1.0.1 h1:hVEDRuW9WhqvTksDi092OO9UecX7PAMDrD47KPEqAg0=
 github.com/whosonfirst/go-whosonfirst-uri v1.0.1/go.mod h1:8eaDVcc4v+HHHEDaRbApdmhPwM4/JQllw2PktvZcPVs=
+github.com/whosonfirst/go-whosonfirst-uri v1.1.0 h1:kNYOmKSm3u2asUOeq7yXL1Q8gFKkPIl8A0qinKrGV/8=
+github.com/whosonfirst/go-whosonfirst-uri v1.1.0/go.mod h1:8eaDVcc4v+HHHEDaRbApdmhPwM4/JQllw2PktvZcPVs=
 github.com/whosonfirst/walk v0.0.1 h1:t0QrqGwOdPMSeovFZSXfiS0GIGHrRXK3Wb9z5Uhs2bg=
 github.com/whosonfirst/walk v0.0.1/go.mod h1:1KtP/VeooSlFOI61p+THc/C16Ra8Z5MjpjI0tsd3c1M=
 github.com/whosonfirst/warning v0.1.1 h1:h29zL3VNL9VUHztkAAndzblhrDHyik9z47OuUR2Vovw=

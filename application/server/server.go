@@ -12,6 +12,7 @@ import (
 	"github.com/whosonfirst/go-reader"
 	"github.com/whosonfirst/go-whosonfirst-reader/application"
 	"github.com/whosonfirst/go-whosonfirst-reader/www"
+	uri "github.com/whosonfirst/go-whosonfirst-uri/http"
 	"log"
 	"net/http"
 	"time"
@@ -100,28 +101,28 @@ func (app *ServerApplication) RunWithFlagSet(ctx context.Context, fs *flag.FlagS
 	// Cache the previous handler (data, redirect) results since they might be
 	// expensive especially if we are using a go-whosonfirst-findingaid instance
 	// the reader.Reader itself to locate a record (to read).
-	
+
 	if enable_cache {
 
 		memcached, err := memory.NewAdapter(
 			memory.AdapterWithAlgorithm(memory.LRU),
-			memory.AdapterWithCapacity(10000000),	// TO DO: make this a CLI option
+			memory.AdapterWithCapacity(10000000), // TO DO: make this a CLI option
 		)
-		
+
 		if err != nil {
 			return fmt.Errorf("Failed to create cache memory adapter, %w", err)
 		}
-		
+
 		cacheClient, err := cache.NewClient(
 			cache.ClientWithAdapter(memcached),
-			cache.ClientWithTTL(10*time.Minute),	// TO DO: make this a CLI option
-			cache.ClientWithRefreshKey("opn"),	// TO DO: make this a CLI option
+			cache.ClientWithTTL(10*time.Minute), // TO DO: make this a CLI option
+			cache.ClientWithRefreshKey("opn"),   // TO DO: make this a CLI option
 		)
-		
+
 		if err != nil {
 			return fmt.Errorf("Failed to create cache client, %w", err)
 		}
-		
+
 		handler = cacheClient.Middleware(handler)
 	}
 
@@ -129,8 +130,8 @@ func (app *ServerApplication) RunWithFlagSet(ctx context.Context, fs *flag.FlagS
 	// resolve the request URI in to a valid Who's On First relative path. That path will
 	// be stored in the handler's `X-WhosOnFirst-Rel-Path` response header. It is assumed
 	// the header will be read and acted on by "downstream" middleware handler.
-	
-	handler = www.ParseURIHandler(handler)
+
+	handler = uri.ParseURIHandler(handler)
 
 	mux := http.NewServeMux()
 	mux.Handle("/", handler)
@@ -138,9 +139,9 @@ func (app *ServerApplication) RunWithFlagSet(ctx context.Context, fs *flag.FlagS
 	// For example: This is the same ParseURIHandler as above but without any "next"
 	// handlers and so the default behaviour is simply to write the `X-WhosOnFirst-Rel-Path`
 	// response header and print the relative path to the browser.
-	
-	uri_handler := www.ParseURIHandler(nil)
-	
+
+	uri_handler := uri.ParseURIHandler(nil)
+
 	mux.Handle("/uri/", uri_handler)
 
 	s, err := server.NewServer(ctx, server_uri)
