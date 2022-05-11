@@ -4,20 +4,20 @@ import (
 	"context"
 	"fmt"
 	"github.com/whosonfirst/go-reader"
-	"github.com/whosonfirst/go-whosonfirst-geojson-v2/properties/whosonfirst"
+	"github.com/whosonfirst/go-whosonfirst-feature/properties"
 	"os"
 	"path/filepath"
 	"testing"
 )
 
-func TestLoadFeatureFromID(t *testing.T) {
+func TestLoadBytes(t *testing.T) {
 
 	ctx := context.Background()
 
 	cwd, err := os.Getwd()
 
 	if err != nil {
-		t.Fatal(err)
+		t.Fatalf("Failed to get current working directory, %v", err)
 	}
 
 	fixtures := filepath.Join(cwd, "fixtures")
@@ -26,18 +26,66 @@ func TestLoadFeatureFromID(t *testing.T) {
 	r, err := reader.NewReader(ctx, r_uri)
 
 	if err != nil {
-		t.Fatal(err)
+		t.Fatalf("Failed to create new reader, %v", err)
 	}
 
 	wof_id := int64(101736545)
 
-	f, err := LoadFeatureFromID(ctx, r, wof_id)
+	f, err := LoadBytes(ctx, r, wof_id)
 
 	if err != nil {
-		t.Fatal(err)
+		t.Fatalf("Failed to load feature, %v", err)
 	}
 
-	if whosonfirst.Id(f) != wof_id {
+	id, err := properties.Id(f)
+
+	if err != nil {
+		t.Fatalf("Failed to derive ID, %v", err)
+	}
+
+	if id != wof_id {
+		t.Fatal("Invalid WOF ID")
+	}
+}
+
+func TestLoadFeature(t *testing.T) {
+
+	ctx := context.Background()
+
+	cwd, err := os.Getwd()
+
+	if err != nil {
+		t.Fatalf("Failed to get current working directory, %v", err)
+	}
+
+	fixtures := filepath.Join(cwd, "fixtures")
+
+	r_uri := fmt.Sprintf("fs://%s", fixtures)
+	r, err := reader.NewReader(ctx, r_uri)
+
+	if err != nil {
+		t.Fatalf("Failed to create new reader, %v", err)
+	}
+
+	wof_id := int64(101736545)
+
+	f, err := LoadFeature(ctx, r, wof_id)
+
+	if err != nil {
+		t.Fatalf("Failed to load feature, %v", err)
+	}
+
+	props := f.Properties
+
+	v, ok := props["wof:id"]
+
+	if !ok {
+		t.Fatalf("Failed to derive ID, %v", err)
+	}
+
+	id := int64(v.(float64))
+
+	if id != wof_id {
 		t.Fatal("Invalid WOF ID")
 	}
 }
