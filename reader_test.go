@@ -3,11 +3,12 @@ package reader
 import (
 	"context"
 	"fmt"
-	"github.com/whosonfirst/go-reader"
-	"github.com/whosonfirst/go-whosonfirst-feature/properties"
 	"os"
 	"path/filepath"
 	"testing"
+
+	"github.com/whosonfirst/go-reader"
+	"github.com/whosonfirst/go-whosonfirst-feature/properties"
 )
 
 func TestLoadBytes(t *testing.T) {
