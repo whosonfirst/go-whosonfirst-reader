@@ -1,4 +1,4 @@
-module github.com/whosonfirst/go-whosonfirst-reader
+module github.com/whosonfirst/go-whosonfirst-reader/v2
 
 go 1.22
 
