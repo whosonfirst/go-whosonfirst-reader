@@ -4,12 +4,13 @@ import (
 	"compress/bzip2"
 	"context"
 	"fmt"
-	"github.com/whosonfirst/go-ioutil"
 	"io"
 	"net/url"
 	"os"
 	"path/filepath"
 	"strconv"
+
+	"github.com/whosonfirst/go-ioutil"
 )
 
 // FileReader is a struct that implements the `Reader` interface for reading documents from files on a local disk.
@@ -76,6 +77,25 @@ func NewFileReader(ctx context.Context, uri string) (Reader, error) {
 	}
 
 	return r, nil
+}
+
+// Exists returns a boolean value indicating whether 'path' already exists.
+func (r *FileReader) Exists(ctx context.Context, path string) (bool, error) {
+
+	abs_path := r.ReaderURI(ctx, path)
+
+	_, err := os.Stat(abs_path)
+
+	if err != nil {
+
+		if os.IsNotExist(err) {
+			return false, nil
+		}
+
+		return false, fmt.Errorf("Failed to stat %s, %v", abs_path, err)
+	}
+
+	return true, nil
 }
 
 // Read will open an `io.ReadSeekCloser` for a file matching 'path'.
