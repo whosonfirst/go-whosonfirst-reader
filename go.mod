@@ -4,7 +4,7 @@ go 1.22
 
 require (
 	github.com/paulmach/orb v0.11.1
-	github.com/whosonfirst/go-reader v1.1.0
+	github.com/whosonfirst/go-reader/v2 v2.0.0
 	github.com/whosonfirst/go-whosonfirst-feature v0.0.29
 	github.com/whosonfirst/go-whosonfirst-uri v1.3.0
 )
